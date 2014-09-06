@@ -43,7 +43,7 @@ namespace 中国炎黄自动交易系统
             childform.webBrowser1.Navigate("http://www.cgcape.pro/member.aspx");
             current_URL = "http://www.cgcape.pro/member.aspx";
             tabControl1.SelectedIndex = 3;
-            tradeSet.ReadXml("trade.xml");
+            tradeSet.ReadXml("../../trade.xml");
             tradeList = tradeSet.Tables[0];
             dataGridView2.DataSource = tradeList;
             initGrid();
@@ -328,7 +328,11 @@ namespace 中国炎黄自动交易系统
                     }
                     break;
                 case 7:
-
+                    HtmlElementCollection currentTds = html.GetElementsByTagName("table")[0].GetElementsByTagName("tr")[2].GetElementsByTagName("td");
+                    string sellid = currentTds[0].InnerText;
+                    string selltime = currentTds[5].InnerText;
+                    StateInfo.option = 100;
+                    break;
                 case 8:
                     for (int i = 0; i < dataGridView2.Rows.Count;i++ )
                     {
@@ -363,6 +367,8 @@ namespace 中国炎黄自动交易系统
                     html.GetElementById("Submit2").InvokeMember("click");
                     dataGridView2.Rows.RemoveAt(0);
                     break;
+                case 100:
+                    break;
                 default:
                     break;
             }
@@ -376,12 +382,15 @@ namespace 中国炎黄自动交易系统
                 HtmlElement btn = html.GetElementById("repeater1_tdOP_" + dataGridView1.CurrentRow.Index.ToString());
                 btn.Children[0].InvokeMember("click");
                 textBox1.Text = "";
-
+                int rowindex = e.RowIndex;
+                String toSellId = dataGridView1.Rows[rowindex].Cells[0].Value.ToString();
                 string price =html.GetElementById("tradePrice").Parent.InnerText;
                 textBox2.Text = price.Substring(8,price.Length-10); 
                 textBox3.Text = "000000";
                 checkBox1.Checked = true;
-                panel2.Visible = true;   
+                panel2.Visible = true;
+               
+
             }
         }
 
@@ -398,6 +407,8 @@ namespace 中国炎黄自动交易系统
             {
                 addTrade(textBox1.Text, textBox3.Text, buyTime, "");
             }
+            StateInfo.option = 7;
+            childform.webBrowser1.Navigate("http://www.cgcape.pro/shareTradeRecord.aspx");
         }
 
         private void addTrade(string amount, string pass3, string buyTime, string sellTime)
