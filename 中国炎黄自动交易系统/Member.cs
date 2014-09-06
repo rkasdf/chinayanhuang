@@ -287,6 +287,7 @@ namespace 中国炎黄自动交易系统
                     }
                     break;
                 case 3:    //积分卖出
+                    initGrid1();
                     dataGridView1.Rows.Clear();
                     HtmlElement table3 = html.GetElementsByTagName("table")[0];
                     HtmlElementCollection trs3 = table3.GetElementsByTagName("tr");
@@ -326,6 +327,8 @@ namespace 中国炎黄自动交易系统
                         dataGridView1.Rows.Add(row);
                     }
                     break;
+                case 7:
+
                 case 8:
                     for (int i = 0; i < dataGridView2.Rows.Count;i++ )
                     {

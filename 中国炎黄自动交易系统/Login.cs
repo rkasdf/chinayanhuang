@@ -101,6 +101,8 @@ namespace 中国炎黄自动交易系统
             {
                 html = webBrowser1.Document;
                 HtmlElement img = html.GetElementById("CodeImg");
+                if (img == null)
+                    return;
                 img.Style = "position:absolute;z-index:9999;top:0px;left:0px";
                 Bitmap b = new Bitmap(img.ClientRectangle.Width, img.ClientRectangle.Height);
                 webBrowser1.DrawToBitmap(b, new Rectangle(new Point(), img.ClientRectangle.Size));
