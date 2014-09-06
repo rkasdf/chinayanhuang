@@ -32,7 +32,7 @@ namespace 中国炎黄自动交易系统
             webBrowser1.ScriptErrorsSuppressed = true;
             button3.Visible = false;
             label4.Visible = false;
-            conf.ReadXml("conf.xml");
+            conf.ReadXml("../../conf.xml");
             user = conf.Tables[0];
             comboBox1.DataSource = user;
             comboBox1.DisplayMember = "userID";

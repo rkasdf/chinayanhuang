@@ -1,0 +1,22 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <users>
+    <userID>jk3060</userID>
+    <password>666666</password>
+    <RemPass>1</RemPass>
+    <AutoLogin>0</AutoLogin>
+  </users>
+  <users>
+    <userID>jk3061</userID>
+    <password>666666</password>
+    <RemPass>1</RemPass>
+    <AutoLogin>0</AutoLogin>
+  </users>
+  <users>
+    <userID />
+    <password />
+    <RemPass />
+    <AutoLogin />
+    <user />
+  </users>
+</NewDataSet>
