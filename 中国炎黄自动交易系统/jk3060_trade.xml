@@ -1,0 +1,23 @@
+<?xml version="1.0" standalone="yes"?>
+<trade>
+  <item>
+    <buyId>263743</buyId>
+    <sellId>801992</sellId>
+    <amount>100</amount>
+    <sellTime>2014-09-07 20:38:06</sellTime>
+    <buyPrice>0.104</buyPrice>
+    <sellPrice>0.131</sellPrice>
+    <state>0</state>
+    <action />
+  </item>
+  <item>
+    <buyId />
+    <sellId />
+    <amount />
+    <sellTime />
+    <buyPrice />
+    <sellPrice />
+    <state />
+    <action />
+  </item>
+</trade>

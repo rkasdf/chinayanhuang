@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using System.Xml;
 using mshtml;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -21,6 +23,8 @@ namespace 中国炎黄自动交易系统
         string current_URL;
         DataSet tradeSet = new DataSet();
         DataTable tradeList = new DataTable();
+        DataRow newItem;
+        string filePath;
         string buyTime;
 
         static int count = 0;
@@ -29,13 +33,19 @@ namespace 中国炎黄自动交易系统
         public Member()
         {
             InitializeComponent();
+            filePath = "../../" + StateInfo.userID + "_trade.xml";
+            if (!File.Exists(filePath))
+            {
+                createNewXmlFile(filePath);
+            }
         }
 
         private void Member_Load(object sender, EventArgs e)
         {
+
             Thread t1 = new Thread(new ThreadStart(AutoTradeThread));
             t1.Start();
-
+            
             StateInfo.showChild = false;
             StateInfo.option = 0;
             childform.showInfoEvent += new webDelegate(show_Info);
@@ -43,10 +53,44 @@ namespace 中国炎黄自动交易系统
             childform.webBrowser1.Navigate("http://www.cgcape.pro/member.aspx");
             current_URL = "http://www.cgcape.pro/member.aspx";
             tabControl1.SelectedIndex = 3;
-            tradeSet.ReadXml("../../trade.xml");
+            
+            tradeSet.ReadXml(filePath);
             tradeList = tradeSet.Tables[0];
             dataGridView2.DataSource = tradeList;
             initGrid();
+        }
+
+        public void createNewXmlFile(String filePath)
+        {
+            try
+            {
+                XmlDocument myXmlDoc = new XmlDocument();
+                XmlElement rootElement = myXmlDoc.CreateElement("trade");
+                myXmlDoc.AppendChild(rootElement);
+                XmlElement firstLevelElement1 = myXmlDoc.CreateElement("item");
+                rootElement.AppendChild(firstLevelElement1);
+                XmlElement secondLevelElement1 = myXmlDoc.CreateElement("buyId");
+                firstLevelElement1.AppendChild(secondLevelElement1);
+                XmlElement secondLevelElement2 = myXmlDoc.CreateElement("sellId");
+                firstLevelElement1.AppendChild(secondLevelElement2);
+                XmlElement secondLevelElement3 = myXmlDoc.CreateElement("amount");
+                firstLevelElement1.AppendChild(secondLevelElement3);
+                XmlElement secondLevelElement4 = myXmlDoc.CreateElement("sellTime");
+                firstLevelElement1.AppendChild(secondLevelElement4);
+                XmlElement secondLevelElement5 = myXmlDoc.CreateElement("buyPrice");
+                firstLevelElement1.AppendChild(secondLevelElement5);
+                XmlElement secondLevelElement6 = myXmlDoc.CreateElement("sellPrice");
+                firstLevelElement1.AppendChild(secondLevelElement6);
+                XmlElement secondLevelElement7 = myXmlDoc.CreateElement("state");
+                firstLevelElement1.AppendChild(secondLevelElement7);
+                XmlElement secondLevelElement8 = myXmlDoc.CreateElement("action");
+                firstLevelElement1.AppendChild(secondLevelElement8);
+                myXmlDoc.Save(filePath);
+            }
+            catch (Exception ex)
+           {
+                Console.WriteLine(ex.ToString());
+           }
         }
 
         public static void AutoTradeThread()
@@ -220,7 +264,7 @@ namespace 中国炎黄自动交易系统
                     label8.Text = tds[1].InnerText;
                     break;
                 case 1:    //个人股仓
-                     initGrid2();
+                    initGrid2();
                     dataGridView4.Rows.Clear();
                     HtmlElement table1 = html.GetElementsByTagName("table")[0];
                     HtmlElementCollection trs1 = table1.GetElementsByTagName("tr");
@@ -261,6 +305,7 @@ namespace 中国炎黄自动交易系统
                         }
                         dataGridView4.Rows.Add(row);
                     }
+                    StateInfo.option = 100;
                     break;
                 case 2:    //交易行情
 
@@ -327,10 +372,17 @@ namespace 中国炎黄自动交易系统
                         dataGridView1.Rows.Add(row);
                     }
                     break;
-                case 7:
+                case 7://挂单后记录ID
                     HtmlElementCollection currentTds = html.GetElementsByTagName("table")[0].GetElementsByTagName("tr")[2].GetElementsByTagName("td");
-                    string sellid = currentTds[0].InnerText;
-                    string selltime = currentTds[5].InnerText;
+                    newItem["sellId"] = currentTds[0].InnerText.TrimEnd();
+                    newItem["sellTime"] = currentTds[5].InnerText.TrimEnd();
+                    if (checkBox1.Checked)
+                    {
+                        tradeList.Rows.InsertAt(newItem, 0);
+                        //addTrade(newItem["buyId"], newItem["sellId"], newItem["amount"], newItem["sellTime"], newItem["buyPrice"], newItem["sellPrice"], newItem["state"], newItem["action"]);
+                        tradeSet.WriteXml(filePath);
+                        //addTrade(textBox1.Text, textBox3.Text, buyTime, "");
+                    }
                     StateInfo.option = 100;
                     break;
                 case 8:
@@ -367,6 +419,10 @@ namespace 中国炎黄自动交易系统
                     html.GetElementById("Submit2").InvokeMember("click");
                     dataGridView2.Rows.RemoveAt(0);
                     break;
+                case 10: //暂时中转链接
+                    StateInfo.option = 7;
+                    childform.webBrowser1.Navigate("http://www.cgcape.pro/shareTradeRecord.aspx");
+                    break;
                 case 100:
                     break;
                 default:
@@ -379,11 +435,13 @@ namespace 中国炎黄自动交易系统
             if (dataGridView1.CurrentCell.Value.ToString() == "[卖出]")
             {
                 HtmlDocument html = childform.webBrowser1.Document;
+                newItem = tradeSet.Tables[0].NewRow();
                 HtmlElement btn = html.GetElementById("repeater1_tdOP_" + dataGridView1.CurrentRow.Index.ToString());
                 btn.Children[0].InvokeMember("click");
                 textBox1.Text = "";
                 int rowindex = e.RowIndex;
-                String toSellId = dataGridView1.Rows[rowindex].Cells[0].Value.ToString();
+                newItem["buyId"] = dataGridView1.Rows[rowindex].Cells[0].Value.ToString();
+                newItem["buyPrice"] = dataGridView1.Rows[rowindex].Cells[3].Value.ToString();
                 string price =html.GetElementById("tradePrice").Parent.InnerText;
                 textBox2.Text = price.Substring(8,price.Length-10); 
                 textBox3.Text = "000000";
@@ -397,24 +455,22 @@ namespace 中国炎黄自动交易系统
         private void button3_Click_1(object sender, EventArgs e)
         {
             HtmlDocument html = childform.webBrowser1.Document;
-            
+            StateInfo.option = 10;
             html.GetElementById("tradeAmount").InnerText = textBox1.Text;
             html.GetElementById("tradePrice").InnerText = textBox2.Text;
             html.GetElementById("passEncry").InnerText = textBox3.Text;
+            newItem["amount"] = textBox1.Text.TrimEnd();
+            newItem["sellPrice"] = textBox2.Text.TrimEnd();
+            newItem["state"] = "0";
+            newItem["action"] = "";
             html.GetElementById("Submit2").InvokeMember("click");
             panel2.Visible = false;
-            if (checkBox1.Checked)
-            {
-                addTrade(textBox1.Text, textBox3.Text, buyTime, "");
-            }
-            StateInfo.option = 7;
-            childform.webBrowser1.Navigate("http://www.cgcape.pro/shareTradeRecord.aspx");
         }
 
-        private void addTrade(string amount, string pass3, string buyTime, string sellTime)
+        private void addTrade(string buyId, string sellId, string amount,  string sellTime, string buyPrice, string sellPrice, string state, string action)
         {
             //tradeList.Rows.RemoveAt(tradeList.Rows.Count);
-            tradeList.Rows.Add(textBox1.Text, textBox2.Text, buyTime, sellTime, "0", "", textBox3.Text);
+            tradeList.Rows.Add(buyId, sellId, amount,  sellTime, buyPrice, sellPrice, state, action);
             //tradeList.Rows.Add("", "", "", "", "", "", "");
         }
 

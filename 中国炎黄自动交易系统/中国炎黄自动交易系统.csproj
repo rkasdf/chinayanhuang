@@ -104,7 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="conf.xml" />
-    <Content Include="trade.xml" />
+    <Content Include="jk3060_trade.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
